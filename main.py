@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 
 import paho.mqtt.client as mqtt
-import json
-import time
-import threading
-import uuid
-import re
+import json, time, threading, uuid, re, os
 from prometheus_client import start_http_server, Gauge
 
 CHANNEL_MAP = ["L1", "L2", "L3"]
@@ -40,19 +36,21 @@ class Client:
         match = regex.match(msg.topic)
         if match:
             value = msg.payload.decode()
+            print("Matched topic %s: %s" % (msg.topic, value))
             device = match.group(1)
             sensor = match.group(3)
             channel = CHANNEL_MAP[int(match.group(2))]
             self.metrics[sensor].labels(device, channel).set(value)
 
-HOST = "192.168.1.2"
-PORT = 1883
-USER = "mqtt"
-PASSWD = "mqtt"
+MQTT_HOST = os.environ.get('MQTT_HOST', "127.0.0.1")
+MQTT_PORT = os.environ.get('MQTT_PORT', 1883)
+MQTT_USER = os.environ.get('MQTT_USER', "")
+MQTT_PASS = os.environ.get('MQTT_PASS' "")
+PORT = os.environ.get('PORT', 8000)
 
-start_http_server(8000)
+start_http_server(PORT)
 
-main_client = Client(HOST, PORT, USER, PASSWD)
+main_client = Client(MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PASS)
 main_client.connect()
 
 main_client.client.loop_forever()

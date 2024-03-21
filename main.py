@@ -24,16 +24,14 @@ class Client:
             "voltage": Gauge(
                 "shelly_voltage", "Measured voltage", ["device", "channel"]
             ),
-            "total": Gauge(
-                "shelly_voltage", "Total consumption", ["device", "channel"]
-            ),
+            "total": Gauge("shelly_total", "Total consumption", ["device", "channel"]),
             "total_returned": Gauge(
-                "shelly_voltage", "Total returned power", ["device", "channel"]
+                "shelly_total_returned", "Total returned power", ["device", "channel"]
             ),
         }
 
     def connect(self):
-        c = mqtt.Client(client_id=self.uuid)
+        c = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id=self.uuid)
         c.username_pw_set(self.user, self.passwd)
         c.on_connect = self.on_connect
         c.on_message = self.on_message
@@ -46,7 +44,7 @@ class Client:
 
     def on_message(self, client, userdata, msg):
         regex = re.compile(
-            "^shellies/(\S+)/emeter/(\d+)/(power|current|voltage|total|total_returned)$"
+            r"^shellies/(\S+)/emeter/(\d+)/(power|current|voltage|total|total_returned)$"
         )
         match = regex.match(msg.topic)
         if match:
@@ -64,7 +62,7 @@ MQTT_USER = os.environ.get("MQTT_USER", "")
 MQTT_PASS = os.environ.get("MQTT_PASS" "")
 PORT = os.environ.get("PORT", 8000)
 
-start_http_server(PORT)
+start_http_server(int(PORT))
 
 main_client = Client(MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PASS)
 main_client.connect()

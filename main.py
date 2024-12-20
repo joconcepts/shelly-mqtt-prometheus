@@ -24,7 +24,7 @@ class Client:
             "voltage": Gauge(
                 "shelly_voltage", "Measured voltage", ["device", "channel"]
             ),
-            "total": Gauge("shelly_total", "Total consumption", ["device", "channel"]),
+            "total": Gauge("shelly_total_consumed", "Total consumption", ["device", "channel"]),
             "total_returned": Gauge(
                 "shelly_total_returned", "Total returned power", ["device", "channel"]
             ),
